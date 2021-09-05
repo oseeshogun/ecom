@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "131610233802",
+    "project_id": "ecom-6b4a7",
+    "storage_bucket": "ecom-6b4a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131610233802:android:cb80896541a7d23c5d9d33",
+        "android_client_info": {
+          "package_name": "com.shogun.ecom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131610233802-7pdnapmo29l5ube73gnc1shhicio3dmk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBKMtAWGmvdWy5cdrLW3iKWJLGHu6B4d8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131610233802-7pdnapmo29l5ube73gnc1shhicio3dmk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
