@@ -1,17 +1,107 @@
 import 'package:ecom/home/home.dart';
 import 'package:ecom/src/auth/google.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:sweetsheet/sweetsheet.dart';
 
 class Authentication extends HookWidget {
   final formKey = GlobalKey<FormState>();
+  final SweetSheet _sweetSheet = SweetSheet();
+
   @override
   Widget build(BuildContext context) {
     final email = useState<String>("");
     final password = useState<String>("");
     final passwordVisible = useState<bool>(false);
+    final signin = useState<bool>(true);
+    final loading = useState<bool>(false);
+
+    nextStep() {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => Home()),
+        ModalRoute.withName("/"),
+      );
+    }
+
+    onException(String text) {
+      _sweetSheet.show(
+        context: context,
+        description: Text(text),
+        color: SweetSheetColor.WARNING,
+        positive: SweetSheetAction(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          title: 'OK',
+          icon: Icons.warning,
+        ),
+      );
+    }
+
+    Future<void> signIn() async {
+      loading.value = true;
+      try {
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.value,
+          password: password.value,
+        );
+        nextStep();
+      } on FirebaseAuthException catch (e) {
+        loading.value = false;
+        debugPrint(e.code);
+        if (e.code == 'network-request-failed')
+          onException("Vérifier votre connexion internet !");
+        else if (e.code == 'weak-password')
+          onException("Le mot de passe est trop faible !");
+        else if (e.code == 'email-already-in-use')
+          onException("Un autre compte existe déjà avec cette adresse mail !");
+      } catch (e) {
+        loading.value = false;
+        debugPrint(e.toString());
+      }
+    }
+
+    Future<void> signUp() async {
+      loading.value = true;
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.value,
+          password: password.value,
+        );
+        _sweetSheet.show(
+          context: context,
+          description: Text("Votre compte a été créé avec succès !"),
+          color: SweetSheetColor.NICE,
+          positive: SweetSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            title: 'Connectez-vous',
+            icon: Icons.login,
+          ),
+        );
+        loading.value = false;
+        signin.value = true;
+      } on FirebaseAuthException catch (e) {
+        loading.value = false;
+        debugPrint(e.code);
+        if (e.code == 'network-request-failed')
+          onException("Vérifier votre connexion internet !");
+        else if (e.code == 'weak-password')
+          onException("Le mot de passe est trop faible !");
+        else if (e.code == 'email-already-in-use')
+          onException("Un autre compte existe déjà avec cette adresse mail !");
+      } catch (e) {
+        loading.value = false;
+        debugPrint(e.toString());
+      }
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -44,7 +134,7 @@ class Authentication extends HookWidget {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "Se connecter",
+                            signin.value ? "Se connecter" : "S'enregistrer",
                             style: Theme.of(context).textTheme.headline4,
                           ),
                         ),
@@ -57,10 +147,24 @@ class Authentication extends HookWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          onChanged: (value) {
+                            email.value = value;
+                          },
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Veuillez mettre votre adresse mail';
+                            } else if (!EmailValidator.validate(value.trim())) {
+                              return "L'adresse mail est invalide.";
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 10),
                         TextFormField(
                           obscureText: !passwordVisible.value,
+                          onChanged: (value) {
+                            password.value = value;
+                          },
                           decoration: InputDecoration(
                             hintText: "Mot de passe",
                             labelText: "Mot de passe",
@@ -78,8 +182,18 @@ class Authentication extends HookWidget {
                               },
                             ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Veuillez mettre votre mot de passe';
+                            } else if (value.length < 7) {
+                              return "le mot de passe doit avoir au moins 7 caractères";
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 20),
+                        if (loading.value) CircularProgressIndicator(
+                        ) else
                         SizedBox(
                           width: MediaQuery.of(context).size.width * .8,
                           child: ElevatedButton(
@@ -96,9 +210,16 @@ class Authentication extends HookWidget {
                                 vertical: 20,
                               )),
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              if (formKey.currentState?.validate() == false)
+                                return;
+                              if (signin.value)
+                                signIn();
+                              else
+                                signUp();
+                            },
                             child: Text(
-                              "Se connecter",
+                              signin.value ? "Se connecter" : "S'enregistrer",
                               style: Theme.of(context)
                                   .textTheme
                                   .headline6!
@@ -109,20 +230,44 @@ class Authentication extends HookWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Text.rich(
-                            TextSpan(
-                              text: "Vous n'avez pas de compte ? ",
-                              children: [
-                                TextSpan(
-                                  text: "Enregistez-vous",
-                                  style: TextStyle(color: Colors.blueAccent),
-                                ),
-                              ],
+                        if (signin.value)
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text.rich(
+                              TextSpan(
+                                text: "Vous n'avez pas de compte ? ",
+                                children: [
+                                  TextSpan(
+                                    text: "Enregistez-vous",
+                                    style: TextStyle(color: Colors.blueAccent),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        signin.value = false;
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text.rich(
+                              TextSpan(
+                                text: "Vous avez pas un compte ? ",
+                                children: [
+                                  TextSpan(
+                                    text: "connectez-vous",
+                                    style: TextStyle(color: Colors.blueAccent),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        signin.value = true;
+                                      },
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
                         const SizedBox(height: 20),
                         Row(
                           children: [
@@ -144,13 +289,7 @@ class Authentication extends HookWidget {
                                 icon: Icon(LineIcons.googleLogo),
                                 onPressed: () {
                                   loginWithGmail(
-                                    onSuccess: () {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                        MaterialPageRoute(
-                                            builder: (_) => Home()),
-                                        ModalRoute.withName("/"),
-                                      );
-                                    },
+                                    onSuccess: () => nextStep(),
                                   );
                                 },
                               ),

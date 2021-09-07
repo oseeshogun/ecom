@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "131610233802-c5rd0v41ediked9768tk0ego45li3g8i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shogun.ecom",
+            "certificate_hash": "c996190748543faf99fc8213c2d88a3bc94df9fe"
+          }
+        },
+        {
           "client_id": "131610233802-7pdnapmo29l5ube73gnc1shhicio3dmk.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "131610233802-7pdnapmo29l5ube73gnc1shhicio3dmk.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "131610233802-h6cq6cksus3a5vp9h32g592nsdlrsgi8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shogun.ecom"
+              }
             }
           ]
         }
