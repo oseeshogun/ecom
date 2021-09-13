@@ -1,4 +1,3 @@
-import 'package:ecom/src/models/user.dart';
 
 class Product {
   final String title;

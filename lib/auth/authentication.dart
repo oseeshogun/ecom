@@ -46,8 +46,7 @@ class Authentication extends HookWidget {
     Future<void> signIn() async {
       loading.value = true;
       try {
-        final UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email.value,
           password: password.value,
         );

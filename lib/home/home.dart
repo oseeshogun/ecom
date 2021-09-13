@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecom/home/profil/profil.dart';
 import 'package:ecom/src/models/ecom_category.dart';
 import 'package:ecom/src/providers/categories.dart';
+import 'package:ecom/src/providers/product.dart';
 import 'package:ecom/src/providers/user.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
@@ -11,7 +13,7 @@ class Home extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(),
+      appBar: appBar(context),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -80,12 +82,31 @@ class Home extends HookWidget {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: useProvider(popularProductsProvider).when(
+              data: (products) {
+                if (products.length == 0) return Container();
+                return Container(
+                  height: 220,
+                  child: ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      return Container();
+                    },
+                  ),
+                );
+              },
+              loading: () => Container(),
+              error: (err, st) => Container(),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  AppBar appBar() {
+  AppBar appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -115,20 +136,26 @@ class Home extends HookWidget {
           useProvider(userProvider(FirebaseAuth.instance.currentUser!.uid))
               .when(
             data: (user) {
-              return CachedNetworkImage(
-                imageUrl: user.image,
-                imageBuilder: (context, imageProvider) {
-                  return CircleAvatar(
-                    radius: 20,
-                    backgroundImage: imageProvider,
-                  );
+              return InkWell(
+                onTap: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => Profil()));
                 },
-                placeholder: (context, _) {
-                  return CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage("assets/images/avatar.jpg"),
-                  );
-                },
+                child: CachedNetworkImage(
+                  imageUrl: user.image,
+                  imageBuilder: (context, imageProvider) {
+                    return CircleAvatar(
+                      radius: 20,
+                      backgroundImage: imageProvider,
+                    );
+                  },
+                  placeholder: (context, _) {
+                    return CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage("assets/images/avatar.jpg"),
+                    );
+                  },
+                ),
               );
             },
             loading: () => Container(),
