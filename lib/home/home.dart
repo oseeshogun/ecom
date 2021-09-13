@@ -119,11 +119,13 @@ class Home extends HookWidget {
                 imageUrl: user.image,
                 imageBuilder: (context, imageProvider) {
                   return CircleAvatar(
+                    radius: 20,
                     backgroundImage: imageProvider,
                   );
                 },
                 placeholder: (context, _) {
                   return CircleAvatar(
+                    radius: 20,
                     backgroundImage: AssetImage("assets/images/avatar.jpg"),
                   );
                 },
