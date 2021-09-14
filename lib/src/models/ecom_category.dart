@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
+
 class EcomCategory {
   final String name;
   final Color color;
   final Icon icon;
+  final int index;
+  final bool restricted;
 
   EcomCategory({
     required this.name,
     required this.color,
     required this.icon,
+    required this.index,
+    required this.restricted,
   });
 
   @override

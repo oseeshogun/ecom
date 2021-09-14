@@ -16,6 +16,8 @@ final ecomCategoriesProvider = StreamProvider<List<EcomCategory>>((ref) {
       final String colorString =
           "FF" + ((doc.data()?["color"] as String?)?.toUpperCase() ?? "F5F5F5");
       return EcomCategory(
+        index: doc.data()?["index"] ?? 0,
+        restricted: doc.data()?["restricted"] ?? false,
         name: doc.data()?["name"] ?? "",
         color: Color(int.parse(colorString, radix: 16)),
         icon: Icon(
