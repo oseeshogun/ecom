@@ -1,6 +1,16 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:image_picker/image_picker.dart';
+
+Future<String> uploadFile(String folder, File file) async {
+  final frontUploadTask = await FirebaseStorage.instance
+      .ref('$folder/${DateTime.now().toIso8601String()}.png')
+      .putFile(file);
+  return await frontUploadTask.ref.getDownloadURL();
+}
 
 Future<ImageSource?> getPicker(BuildContext context) async {
   return await showPlatformDialog<ImageSource>(
@@ -90,6 +100,23 @@ Future<String?> chooseDialog({
             },
           );
         }),
+        BasicDialogAction(
+          title: Text("Annuler"),
+          onPressed: () {
+            Navigator.of(context).pop(null);
+          },
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> showOutput(BuildContext context, String message) async {
+  await showPlatformDialog(
+    context: context,
+    builder: (_) => BasicDialogAlert(
+      title: Text(message),
+      actions: [
         BasicDialogAction(
           title: Text("Annuler"),
           onPressed: () {

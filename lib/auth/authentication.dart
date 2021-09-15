@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecom/home/home.dart';
 import 'package:ecom/src/auth/google.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -69,7 +70,8 @@ class Authentication extends HookWidget {
     Future<void> signUp() async {
       loading.value = true;
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email.value,
           password: password.value,
         );
@@ -87,6 +89,14 @@ class Authentication extends HookWidget {
         );
         loading.value = false;
         signin.value = true;
+        if (userCredential.user != null)
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .set(
+            {},
+            SetOptions(merge: true),
+          );
       } on FirebaseAuthException catch (e) {
         loading.value = false;
         debugPrint(e.code);
@@ -109,7 +119,7 @@ class Authentication extends HookWidget {
           child: Column(
             children: [
               SizedBox(
-                height: MediaQuery.of(context).size.height * .35,
+                height: MediaQuery.of(context).size.height * .3,
                 child: Container(
                   color: Color(0xFFF5F5F5),
                   child: Center(
@@ -123,7 +133,7 @@ class Authentication extends HookWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 15,
+                    vertical: 10,
                     horizontal: 10,
                   ),
                   child: Form(
@@ -190,45 +200,46 @@ class Authentication extends HookWidget {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
-                        if (loading.value) CircularProgressIndicator(
-                        ) else
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * .8,
-                          child: ElevatedButton(
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.black),
-                              shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
-                              padding: MaterialStateProperty.all(
-                                  EdgeInsets.symmetric(
-                                vertical: 20,
-                              )),
-                            ),
-                            onPressed: () {
-                              if (formKey.currentState?.validate() == false)
-                                return;
-                              if (signin.value)
-                                signIn();
-                              else
-                                signUp();
-                            },
-                            child: Text(
-                              signin.value ? "Se connecter" : "S'enregistrer",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline6!
-                                  .copyWith(
-                                    color: Colors.white,
+                        const SizedBox(height: 15),
+                        if (loading.value)
+                          CircularProgressIndicator()
+                        else
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * .8,
+                            child: ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.black),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
                                   ),
+                                ),
+                                padding: MaterialStateProperty.all(
+                                    EdgeInsets.symmetric(
+                                  vertical: 15,
+                                )),
+                              ),
+                              onPressed: () {
+                                if (formKey.currentState?.validate() == false)
+                                  return;
+                                if (signin.value)
+                                  signIn();
+                                else
+                                  signUp();
+                              },
+                              child: Text(
+                                signin.value ? "Se connecter" : "S'enregistrer",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(
+                                      color: Colors.white,
+                                    ),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15),
                         if (signin.value)
                           Align(
                             alignment: Alignment.center,
@@ -277,7 +288,7 @@ class Authentication extends HookWidget {
                                 child: Divider(height: 3, color: Colors.black)),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

@@ -14,7 +14,10 @@ class Product {
   final int clicks;
   final String author;
   final String category;
-  final String categoryDoc;
+  final int categoryIndex;
+  final String money;
+  final List<String> urls;
+  final String id;
 
   /// if t-shirt, the sizes available, S M L XL XXL
   final List<String> sizes;
@@ -49,23 +52,37 @@ class Product {
     required this.category,
     required this.sizes,
     required this.needIntSize,
-    required this.categoryDoc,
+    required this.categoryIndex,
     required this.brand,
     required this.condition,
+    required this.money,
+    required this.urls,
+    required this.id,
   });
 
   static Product fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     return Product(
-        title: doc.data()?["title"] ?? "Sans titre",
-        description: doc.data()?["description"] ?? "",
-        sizes: doc.data()?["sizes"] ?? [],
-        clicks: doc.data()?["clicks"] ?? 0,
-        needIntSize: doc.data()?["needIntSize"] ?? false,
-        price: doc.data()?["price"] ?? 0,
-        author: doc.data()?["author"] ?? "",
-        category: doc.data()?["category"] ?? "",
-        categoryDoc: doc.data()?["categoryDoc"] ?? "",
-        brand: doc.data()?["brand"] ?? "",
-        condition: doc.data()?["condition"] ?? "excellent");
+      id: doc.id,
+      title: doc.data()?["title"] ?? "Sans titre",
+      description: doc.data()?["description"] ?? "",
+      sizes: doc.data()?["sizes"] ?? [],
+      clicks: doc.data()?["clicks"] ?? 0,
+      needIntSize: doc.data()?["needIntSize"] ?? false,
+      price: doc.data()?["price"] ?? 0,
+      author: doc.data()?["author"] ?? "",
+      category: doc.data()?["category"] ?? "",
+      categoryIndex: doc.data()?["categoryIndex"] ?? "",
+      brand: doc.data()?["brand"] ?? "",
+      condition: doc.data()?["condition"] ?? "excellent",
+      money: doc.data()?["money"] ?? "cdf",
+      urls: List.from(doc.data()?["urls"]).map<String>((url) {
+        return url as String;
+      }).toList(),
+    );
+  }
+
+  String get moneySign {
+    if (money.toLowerCase() == "usd") return "\$";
+    return "Fc";
   }
 }

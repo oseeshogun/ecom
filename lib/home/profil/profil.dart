@@ -127,7 +127,10 @@ class Profil extends HookWidget {
                             await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(uid)
-                                .update({"image": profileUrl});
+                                .set(
+                              {"image": profileUrl},
+                              SetOptions(merge: true),
+                            );
                             loadingImage.value = false;
                           },
                         ),
