@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecom/home/product_detail.dart';
 import 'package:ecom/home/profil/profil.dart';
 import 'package:ecom/src/models/ecom_category.dart';
+import 'package:ecom/src/models/product.dart';
 import 'package:ecom/src/providers/categories.dart';
 import 'package:ecom/src/providers/product.dart';
 import 'package:ecom/src/providers/user.dart';
@@ -82,24 +84,138 @@ class Home extends HookWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: useProvider(popularProductsProvider).when(
-              data: (products) {
-                if (products.length == 0) return Container();
-                return Container(
-                  height: 220,
-                  child: ListView.builder(
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      return Container();
-                    },
-                  ),
-                );
-              },
-              loading: () => Container(),
-              error: (err, st) => Container(),
-            ),
+          useProvider(popularProductsProvider).when(
+            data: (products) {
+              debugPrint(products.length.toString());
+              if (products.length == 0) return Container();
+              return Container(
+                height: 240,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final Product product = products[index];
+                    return Padding(
+                      padding: EdgeInsets.only(left: index == 0 ? 8.0 : 0.0),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        width: 176,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => ProductDetail(product)));
+                          },
+                          child: Material(
+                            elevation: 5.0,
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl: product.urls[0],
+                                        imageBuilder: (context, provider) {
+                                          return Hero(
+                                            tag: "product_url",
+                                            child: Container(
+                                              height: 140,
+                                              width: 160,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                image: DecorationImage(
+                                                  image: provider,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        placeholder: (context, _) {
+                                          return Container(
+                                            height: 140,
+                                            width: 160,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: Colors.grey,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      Positioned(
+                                        right: 10,
+                                        bottom: 0,
+                                        child: Transform.translate(
+                                          offset: Offset(0.0, 15.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6.0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: InkWell(
+                                              child: Icon(
+                                                Icons.shopping_cart,
+                                                color: Colors.white,
+                                              ),
+                                              onTap: () {},
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    product.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          product.description,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        product.price.toString() +
+                                            " " +
+                                            product.moneySign,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 17,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            loading: () => Container(),
+            error: (err, st) => Container(),
           ),
         ],
       ),

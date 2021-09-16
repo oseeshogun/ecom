@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 final popularProductsProvider = StreamProvider<List<Product>>((ref) {
   return FirebaseFirestore.instance
       .collection("products")
-      .orderBy("clicks")
+      .orderBy("clicks", descending: true)
       .limit(100)
       .snapshots()
       .asyncMap((query) {

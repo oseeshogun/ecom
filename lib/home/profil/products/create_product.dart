@@ -343,6 +343,7 @@ class CreateProduct extends HookWidget {
                           "title": titleEditingController.text,
                           "description": description.value,
                           "brand": marqueEditingController.text,
+                          "clicks": 0,
                           "author": FirebaseAuth.instance.currentUser!.uid,
                           "money": moneyEditingController.text,
                           "price":
