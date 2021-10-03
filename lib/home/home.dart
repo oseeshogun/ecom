@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'cashout/panier.dart';
+
 class Home extends HookWidget {
   @override
   Widget build(BuildContext context) {
@@ -122,7 +124,7 @@ class Home extends HookWidget {
                                         imageUrl: product.urls[0],
                                         imageBuilder: (context, provider) {
                                           return Hero(
-                                            tag: "product_url",
+                                            tag: product.urls[0],
                                             child: Container(
                                               height: 140,
                                               width: 160,
@@ -241,13 +243,48 @@ class Home extends HookWidget {
           ),
           onPressed: () {},
         ),
-        IconButton(
-          icon: Icon(
-            Icons.shopping_cart,
-            color: Colors.black,
+        if (FirebaseAuth.instance.currentUser != null)
+          useProvider(userProvider(FirebaseAuth.instance.currentUser!.uid))
+              .when(
+            data: (user) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.shopping_cart,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) => Panier()));
+                    },
+                  ),
+                  if (user.panier.length != 0) Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                      padding: const EdgeInsets.all(5.0),
+                      child: Text(
+                        user.panier.length.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => Container(),
+            error: (err, st) {
+              debugPrint(err.toString());
+              return Container();
+            },
           ),
-          onPressed: () {},
-        ),
         if (FirebaseAuth.instance.currentUser != null)
           useProvider(userProvider(FirebaseAuth.instance.currentUser!.uid))
               .when(

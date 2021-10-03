@@ -6,7 +6,9 @@ final userProvider = StreamProvider.family<User, String>((ref, uid){
   return FirebaseFirestore.instance.collection("users").doc(uid).snapshots().asyncMap((doc) {
     return User(
       image: doc.data()?["image"] ?? "",
-      name: doc.data()?["name"] ?? ""
+      name: doc.data()?["name"] ?? "",
+      stars: doc.data()?["stars"] ?? 0.0,
+      panier: ((doc.data()?["panier"] ?? []) as List).map((e) => e.toString()).toList(),
     );
   });
 });

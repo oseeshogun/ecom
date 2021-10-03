@@ -30,3 +30,11 @@ final myproductsProvider =
     }).toList();
   });
 });
+
+final productProvider = StreamProvider.family<Product, String>((ref, id) {
+  return FirebaseFirestore.instance
+      .collection("products")
+      .doc(id)
+      .snapshots()
+      .asyncMap<Product>((doc) => Product.fromDoc(doc));
+});
